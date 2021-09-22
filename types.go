@@ -40,7 +40,7 @@ type ReadReq struct {
 	Mode     string
 }
 
-// not used --
+// --
 func (q ReadReq) MarshalBinary() ([]byte, error) {
 	mode := "octet"
 	if q.Mode != "" {
