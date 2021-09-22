@@ -1,2 +1,4 @@
 # tftpgo
- tftp protocol with Golang
+ simple tftp protocol written in Golang
+ 
+ from network programming with go
