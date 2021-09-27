@@ -8,6 +8,16 @@ import (
 	"strings"
 )
 
+/*
+ * Types for tftp:
+ * tftp read method in golang
+ * basic usage for tftp protocol
+ * Read request RRQ
+ * Data DATA
+ * Aknowledgement ACK
+ * Error ERROR
+ */
+
 const (
 	DatagramSize = 516              // max datagram size
 	BlockSize    = DatagramSize - 4 // datagram - 4-byte header
