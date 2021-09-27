@@ -129,7 +129,7 @@ type Data struct {
 	Payload io.Reader
 }
 
-func (d *Data) MarshalBinary() ([]byte, error) {}
+func (d *Data) MarshalBinary() ([]byte, error) {
 	b := new(bytes.Buffer)
 	b.Grow(DatagramSize)
 
@@ -159,14 +159,14 @@ func (d *Data) UnmarshalBinary(p []byte) error {
 		return errors.New("invalid data packet")
 	}
 
-	var opcode 
+	var opcode OpCode
 
 	err := binary.Read(bytes.NewReader(p[:2]), binary.BigEndian, &opcode) // read the op code
 	if err != nil || opcode != OpData {
 		return errors.New("invalid data packet")
 	}
 
-	err = binary.Read(bytes.NewREader(p[2:4]), binary.BigEndian, &d.Block) // read the block number
+	err = binary.Read(bytes.NewReader(p[2:4]), binary.BigEndian, &d.Block) // read the block number
 	if err != nil {
 		return errors.New("invalid data packet")
 	}
