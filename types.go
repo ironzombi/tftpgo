@@ -51,7 +51,7 @@ type ReadReq struct {
 	Mode     string
 }
 
-// not used --
+//
 func (q ReadReq) MarshalBinary() ([]byte, error) {
 	mode := "octet"
 	if q.Mode != "" {
@@ -184,4 +184,77 @@ func (d *Data) UnmarshalBinary(p []byte) error {
 	d.Payload = bytes.NewBuffer(p[4:])
 
 	return nil
+}
+
+type Ack uint16
+
+func (a Ack) MarshalBinary() ([]byte, error) {
+	cap := 2 + 2 // [OpCode][Block#] 4bytes
+
+	b := new(bytes.Buffer)
+	b.Grow(cap)
+
+	err := binary.Write(b, binary.BigEndian, OpAck) // write opcode
+	if err != nil {
+		return nil, err
+	}
+
+	err = binary.Write(b, binary.BigEndian, a) // write block number
+	if err != nil {
+		return nil, err
+	}
+
+	return b.Bytes(), nil
+}
+
+func (a Ack) UnmarshalBinary(p []byte) error {
+	var code OpCode
+
+	r := bytes.NewReader(p)
+
+	err := binary.Read(r, binary.BigEndian, &code) // read the opcode
+	if err != nil {
+		return err
+	}
+
+	if code != OpAck {
+		return errors.New("INVALID ACK")
+	}
+
+	return binary.Read(r, binary.BigEndian, a)
+}
+
+type Err struct {
+	Error   ErrCode
+	Message string
+}
+
+func (e Err) MarshalBinary() ([]byte, error) {
+	//opcode + errorcode + message + 0 byte
+	cap := 2 + 2 + len(e.Message) + 1
+
+	b := new(bytes.Buffer)
+	b.Grow(cap)
+
+	err := binary.Write(b, binary.BigEndian, OpErr) // write opcode
+	if err != nil {
+		return nil, err
+	}
+
+	err = binary.Write(b, binary.BigEndian, e.Error) // write errcode
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = b.WriteString(e.Message) //write msg
+	if err != nil {
+		return nil, err
+	}
+
+	err = b.WriteByte(0) // write 0byte end
+	if err != nil {
+		return nil, err
+	}
+
+	return b.Bytes(), nil
 }
