@@ -258,3 +258,28 @@ func (e Err) MarshalBinary() ([]byte, error) {
 
 	return b.Bytes(), nil
 }
+
+func (e Err) UnmarshalBinary(p []byte) error {
+	r := bytes.NewBuffer(p)
+
+	var code OpCode
+
+	err := binary.Read(r, binary.BigEndian, &code) // read opcode
+	if err != nil {
+		return err
+	}
+
+	if code != OpErr {
+		return errors.New("ERROR invalid")
+	}
+
+	err = binary.Read(r, binary.BigEndian, &e.Error) // read error message
+	if err != nil {
+		return err
+	}
+
+	e.Message, err = r.ReadString(0)
+	e.Message = strings.TrimRight(e.Message, "\x00") // remove the trailing null/0-byte
+
+	return err
+}
