@@ -1,6 +1,7 @@
 package tftp
 
 import (
+	"bytes"
 	"errors"
 	"log"
 	"net"
@@ -64,4 +65,66 @@ func (s *Server) Serve(conn net.PacketConn) error {
 
 func (s Server) handle(clientAddr string, rrq ReadReq) {
 	log.Printf("[%s] file requested: %s", clientAddr, rrq.Filename)
+
+	conn, err := net.Dial("udp", clientAddr)
+	if err != nil {
+		log.Printf("[%s] connect: %v", clientAddr, err)
+		return
+	}
+	defer func() { _ = conn.Close() }()
+
+	var (
+		ackPkt  Ack
+		errPkt  Err
+		dataPkt = Data{Payload: bytes.NewReader(s.Payload)}
+		buf     = make([]byte, DatagramSize)
+	)
+
+NEXTPACKET:
+	for n := DatagramSize; n == DatagramSize; {
+		data, err := dataPkt.MarshalBinary()
+		if err != nil {
+			log.Printf("[%s] failed to create packet: %v", clientAddr, err)
+			return
+		}
+
+	RETRY:
+		for i := s.Retries; i > 0; i-- {
+			n, err = conn.Write(data) // send the data packet
+			if err != nil {
+				log.Printf("[%s] write: %v", clientAddr, err)
+				return
+			}
+
+			// wait for ACK packet
+			_ = conn.SetReadDeadline(time.Now().Add(s.Timeout))
+
+			_, err = conn.Read(buf)
+			if err != nil {
+				if nErr, ok := err.(net.Error); ok && nErr.Timeout() {
+					continue RETRY
+				}
+
+				log.Printf("[%s] waiting for acknlowdgement: %v", clientAddr, err)
+				return
+			}
+
+			switch {
+			case ackPkt.UnmarshalBinary(buf) == nil:
+				if uint16(ackPkt) == dataPkt.Block {
+					// ack received, send data packet
+					continue NEXTPACKET
+				}
+			case errPkt.UnmarshalBinary(buf) == nil:
+				log.Printf("[%s] error recevied: %v", clientAddr, errPkt.Message)
+				return
+			default:
+				log.Printf("[%s] bad packet", clientAddr)
+			}
+		}
+
+		log.Printf("[%s] too many retries :(", clientAddr)
+		return
+	}
+	log.Printf("[%s] sent %d blocks", clientAddr, dataPkt.Block)
 }
