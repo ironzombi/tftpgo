@@ -1,10 +1,10 @@
 package main
 
 import (
+	tftp "/github/tftpgo/tftp"
 	"flag"
 	"io/ioutil"
 	"log"
-	tftp "network_go/ch6/tftp"
 )
 
 var (
