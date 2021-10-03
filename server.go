@@ -21,7 +21,7 @@ func (s Server) ListenAndServe(addr string) error {
 	}
 	defer func() { _ = conn.Close() }()
 
-	log.Printf("Listening on %s \n")
+	log.Printf("Listening on %s \n", conn.LocalAddr())
 
 	return s.Serve(conn)
 }
