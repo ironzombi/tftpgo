@@ -58,6 +58,10 @@ func (s *Server) Serve(conn net.PacketConn) error {
 			continue
 		}
 
-		go s.handle(addr.String(), rrq) // not implemented yet
+		go s.handle(addr.String(), rrq)
 	}
+}
+
+func (s Server) handle(clientAddr string, rrq ReadReq) {
+	log.Printf("[%s] file requested: %s", clientAddr, rrq.Filename)
 }
