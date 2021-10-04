@@ -11,7 +11,7 @@
  ```
  tftp server listens on port 69/udp (although changed here for non privileged use)
  
- ##the basic flow:
+ ## the basic flow:
  1. Host sends RRQ packet to server.
  1. Server sends data packet to host
  1. Host sends Aknowledgement packet to server
