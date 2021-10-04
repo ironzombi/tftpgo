@@ -1,12 +1,16 @@
-##tftpgo
+## tftpgo
 
  **simple tftp protocol written in Golang**
  
+  ```
+ this only supports read requests (RRQ) and will serve a static payload.txt
+ ```
  
              2 bytes     string    1 byte     string   1 byte
             ------------------------------------------------
            | Opcode |  Filename  |   0  |    Mode    |   0  |
             ------------------------------------------------
+            the read request packet
 
  tftp server listens on port 69/udp (although changed here for non privileged use)
  
@@ -18,9 +22,7 @@
  the transfer is concluded when a packet < 516 bytes is sent/received
  upon receiving packet < 516 byes the host will send aknowledgement packet.
  
-  ```
- this only supports read requests (RRQ) and will serve a static payload.txt
- ```
+
  from network programming with go
 
 rfc1350
