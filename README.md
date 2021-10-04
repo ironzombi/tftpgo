@@ -1,5 +1,6 @@
-**tftpgo**
- simple tftp protocol written in Golang
+#tftpgo
+
+ **simple tftp protocol written in Golang**
  
  
              2 bytes     string    1 byte     string   1 byte
