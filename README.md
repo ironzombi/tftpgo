@@ -1,6 +1,11 @@
 # tftpgo
  simple tftp protocol written in Golang
- ________________________________________>
+ 
+ 
+             2 bytes     string    1 byte     string   1 byte
+            ------------------------------------------------
+           | Opcode |  Filename  |   0  |    Mode    |   0  |
+            ------------------------------------------------
  ```
  this only supports read requests (RRQ) and will serve a static payload.txt
  ```
